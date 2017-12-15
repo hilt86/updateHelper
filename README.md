@@ -10,4 +10,4 @@ There are three playbooks that will make your life easier if you run Ubuntu:
 The last script is probably the most helpful as it will wait for the server to come back up before proceeding to install updates to the next one - it does this using the "serial: 1" at the top of the playbook. It will also check that the host is up by using "wait\_for" at the end of the playbook. Some of my servers come up a little slower than others so you may have to play with the "delay" option here as if the host hasn't rebooted in time then you will have to re-run the playbook.
 
 
-Disclaimer : the original idea for this came from (Chao Huang)[https://realguess.net/2014/12/21/ansible-update-servers-to-the-latest-and-reboot/]
+Disclaimer : the original idea for this came from [Chao Huang](https://realguess.net/2014/12/21/ansible-update-servers-to-the-latest-and-reboot/)
