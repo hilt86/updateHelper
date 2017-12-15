@@ -1,0 +1,11 @@
+---
+- hosts: all
+  gather_facts: False 
+  tasks:
+  - name:  Check if a reboot is required
+    command: ls /var/run/reboot-required
+    register: needsreboot
+    ignore_errors: True
+  - name:  Notify if needs a reboot
+    debug: msg=" {{inventory_hostname}} needs a reboot"
+    when: "'No such file or directory' not in needsreboot.stderr"

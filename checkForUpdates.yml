@@ -1,0 +1,14 @@
+---
+- hosts: all
+  gather_facts: False 
+  tasks:
+  - name:  Update Apt cache and check that update-notifier-common is installed
+    sudo: True
+    apt:  update_cache=yes name=update-notifier-common cache_valid_time=3600
+  - name:  Check if there are updates available
+    shell: "/usr/lib/update-notifier/apt-check 2>&1 | sed s/\\;//" 
+    register: hasaptupdates
+    ignore_errors: True
+  - name:  Notify on updates available
+    debug: msg=" {{inventory_hostname}} has update(s) required" 
+    when: hasaptupdates.stdout != "00"

@@ -1,0 +1,35 @@
+---
+- hosts: all
+  serial: 1
+
+  tasks:
+  - name:  Update Apt cache and check that update-notifier-common is installed
+    become: True
+    apt:  update_cache=yes name=update-notifier-common cache_valid_time=3600
+
+  - name:  Check if there are updates available
+    shell: "/usr/lib/update-notifier/apt-check 2>&1 | sed s/\\;//"
+    register: hasaptupdates
+    ignore_errors: True
+
+  - name: Install required updates 
+    become: True
+    apt: upgrade=dist 
+    when: hasaptupdates.stdout != "00"
+
+  - name:  Check if a reboot is required
+    command: ls /var/run/reboot-required
+    register: needsreboot
+    ignore_errors: True
+
+  - name:  Reboot the machine if it needs it
+    command: shutdown -r now "Ansible updates triggered"
+    become: True
+    async: 0
+    poll: 0
+    ignore_errors: true
+    when: "'No such file or directory' not in needsreboot.stderr"
+
+  - name: waiting for server to come back
+    local_action: wait_for host={{ inventory_hostname }} port=22 state=started delay=120 sleep=5
+    become: false
