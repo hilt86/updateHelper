@@ -3,7 +3,7 @@
   gather_facts: False 
   tasks:
   - name:  Update Apt cache and check that update-notifier-common is installed
-    sudo: True
+    become: True
     apt:  update_cache=yes name=update-notifier-common cache_valid_time=3600
   - name:  Check if there are updates available
     shell: "/usr/lib/update-notifier/apt-check 2>&1 | sed s/\\;//" 
