@@ -4,7 +4,7 @@
 
   tasks:
   - name:  Update Apt cache and check that update-notifier-common is installed
-    sudo: True
+    become: True
     apt:  update_cache=yes name=update-notifier-common cache_valid_time=3600
 
   - name:  Check if there are updates available
@@ -13,6 +13,6 @@
     ignore_errors: True
 
   - name: Install required updates 
-    sudo: True
+    become: True
     apt: upgrade=dist 
     when: hasaptupdates.stdout != "00"
