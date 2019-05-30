@@ -1,14 +1,27 @@
 ---
 - hosts: all
-  gather_facts: False 
+  serial: 1
+  become: True
+
   tasks:
-  - name:  Update Apt cache and check that update-notifier-common is installed
-    become: True
-    apt:  update_cache=yes name=update-notifier-common cache_valid_time=3600
-  - name:  Check if there are updates available
-    shell: "/usr/lib/update-notifier/apt-check 2>&1 | sed s/\\;//" 
-    register: hasaptupdates
-    ignore_errors: True
-  - name:  Notify on updates available
-    debug: msg=" {{inventory_hostname}} has update(s) required" 
-    when: hasaptupdates.stdout != "00"
+    - name: apt-get update
+      apt:
+        update-cache: yes
+      changed_when: 0
+
+    - name: get list of pending upgrades
+      command: apt-get --simulate dist-upgrade
+      args:
+        warn: false # don't warn us about apt having its own plugin
+      register: apt_simulate
+      changed_when: 0
+
+    - name: parse apt-get output to get list of changed packages
+      set_fact:
+        updates: '{{ apt_simulate.stdout_lines | select("match", "^Inst ") | list | sort }}'
+      changed_when: 0
+
+    - name: show pending updates
+      debug:
+        var: updates
+      changed_when: updates.0 is defined

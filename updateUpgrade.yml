@@ -1,18 +1,32 @@
 ---
 - hosts: all
   serial: 1
+  become: True
 
   tasks:
-  - name:  Update Apt cache and check that update-notifier-common is installed
-    become: True
-    apt:  update_cache=yes name=update-notifier-common cache_valid_time=3600
 
-  - name:  Check if there are updates available
-    shell: "/usr/lib/update-notifier/apt-check 2>&1 | sed s/\\;//"
-    register: hasaptupdates
-    ignore_errors: True
+  - name: Update Apt cache
+    apt:
+      update-cache: yes
+    changed_when: 0
+
+  - name: Get list of pending upgrades
+    command: apt-get --simulate dist-upgrade
+    args:
+      warn: false # don't warn us about apt having its own plugin
+    register: apt_simulate
+    changed_when: 0
+
+  - name: Parse apt-get output to get list of changed packages
+    set_fact:
+      updates: '{{ apt_simulate.stdout_lines | select("match", "^Inst ") | list | sort }}'
+    changed_when: 0
+
+  - name: Show pending updates
+    debug:
+      var: updates
+    changed_when: updates.0 is defined
 
   - name: Install required updates 
-    become: True
     apt: upgrade=dist 
-    when: hasaptupdates.stdout != "00"
+    when: updates.0 is defined
