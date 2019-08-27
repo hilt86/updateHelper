@@ -4,7 +4,6 @@
   become: True
 
   tasks:
-
   - name: Update Apt cache
     apt:
       update-cache: yes
