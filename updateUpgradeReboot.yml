@@ -38,11 +38,11 @@
   - name:  Reboot the machine if it needs it
     command: shutdown -r now "Ansible updates triggered"
     become: True
-    async: 0
+    async: 1
     poll: 0
     ignore_errors: true
     when: "'No such file or directory' not in needsreboot.stderr"
 
   - name: waiting for server to come back
-    local_action: wait_for host={{ inventory_hostname }} port=22 state=started delay=10 sleep=5
+    local_action: wait_for host={{ ansible_ssh_host }} port=22 state=started delay=10 timeout=300
     become: false
